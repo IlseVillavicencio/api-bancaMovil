@@ -4,7 +4,8 @@
   "description": "Esta es mi primer api",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch . js index.js"
+    "dev": "nodemon --watch . js index.js",
+    "start": "node index.js"
   },
   "author": "Ilse Villavicencio <ilvi_22@alu.uabcs.mx>",
   "license": "ISC",
@@ -13,7 +14,7 @@
     "@react-navigation/native-stack": "^7.0.4",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
-    "dotenv": "^16.4.6",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "middleware": "^1.0.0",

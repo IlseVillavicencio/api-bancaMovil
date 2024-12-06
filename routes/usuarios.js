@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const connect = require('../db');
-const bcrypt = require('bcrypt');
 const router = Router();
 const authVerify = require('../middleware/authVerify');
 
@@ -24,59 +23,7 @@ router.get('/users', async (req, res) =>{
     }
 });
 
-router.post('/users', async(req, res) => {
-    let db;
-    try {
-        const {email, first_name, last_name, password_hash} = req.body;
-        if( !first_name || !last_name || !email || !password_hash) {
-            return res.json({
-                'status':400,
-                'msg': 'Todos los campos son obligatorios.'
-            });
-        } 
 
-        const emailNoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailNoValido.test(email)) {
-            return res.json({
-                'status':400,
-                'msg': 'El email no es valido'
-            });
-        }
-
-        if(password_hash.length < 8){
-            return res.json({
-                'status':400,
-                'msg': 'La contraseña debe tener al menos 8 caracteres'
-            });
-        }
-        
-        const saltRound = 10;
-        db = await connect();
-        const hashPassword = await bcrypt.hash(password_hash, saltRound);
-        console.log(hashPassword);
-        const query = `INSERT INTO users(first_name, last_name, email, password_hash) VALUES('${first_name}', '${last_name}', '${email}', '${password_hash}')`;
-        const [row] = await db.execute(query);
-        console.log(row);
-        res.json({
-            'status': 200,
-            'msg': 'Usuario creado con exito',
-            'users': row
-        });
-    } catch(err) {
-        console.log(err);
-
-        if(err.code === 'ER_DUP_ENTRY') {
-            return res.json({
-                'status':400,
-                'msg': 'El email ya esta registrado'
-            });
-        }
-        res.json({
-            'status':500,
-            'msg': 'Error al crear el usuario'
-        });
-    }
-});
 
 //Email
 router.get('/users/:email', async (req, res) => {
@@ -170,6 +117,8 @@ router.get('/users/:last_name', async (req, res) => {
     }
 });
 
+//Eliminar cuenta
+
 router.delete('/users/:email', authVerify, async (req, res) => {
     const email = req.params.email;
     console.log(req.email_users);
@@ -195,10 +144,10 @@ router.delete('/users/:email', authVerify, async (req, res) => {
     }
 });
 
-// Actualizar usuario (email, last_name, password_hash) por email
+// Actualizar usuario (email, last_name, password) por email
 router.put('/users/:email', async (req, res) => {
     const email = req.params.email;
-    const {last_name, new_email, password_hash } = req.body;
+    const {last_name, new_email, password} = req.body;
 
     try {
         db = await connect();
@@ -236,9 +185,14 @@ router.put('/users/:email', async (req, res) => {
         }
 
         // actualizar contraseña
-        if (password_hash) {
-            const query = `UPDATE users SET password_hash = ? WHERE email = ?`;
-            const [rows] = await db.execute(query, [password_hash, email]);
+        if (password) {
+            const bcrypt = require('bcrypt');
+            const saltRounds = 10;
+
+            const password = await bcrypt.hash(password, saltRounds);
+            
+            const query = `UPDATE users SET password = ? WHERE email = ?`;
+            const [rows] = await db.execute(query, [password, email]);
             if (rows.affectedRows === 0) {
                 return res.json({
                     'status': 404,

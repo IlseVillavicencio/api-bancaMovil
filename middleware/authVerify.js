@@ -8,8 +8,9 @@ function authVerify(req, res, next) {
     bearer = token.split(' ')[1];
     try {
         const decoded = jwt.verify(bearer, 'secret');
+        console.log('Decoded token:', decoded);
         
-        req.email_usuario = decoded.email;
+        req.user_id = decoded.user_id;
         next();
     } catch(err) {
         return res.status(401).json({'error': 'Ocurrió un error volver a intentarlo' + err});

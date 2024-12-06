@@ -18,18 +18,16 @@ const generateQRCode = async(accountId) => {
 };
 
 router.post('/auth/register', async (req, res) => {
-    const { first_name, last_name, email, password_hash } = req.body;
+    const { first_name, last_name, email, password} = req.body;
     const BASE_BALANCE = 1000;
     let db;
-
     try {
-        if (!first_name || !last_name || !email || !password_hash) {
+        if (!first_name || !last_name || !email || !password) {
             return res.json({
                 'status': 400,
                 'msg': 'Todos los campos son obligatorios'
             });
         }
-
         const emailNoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(!emailNoValido.test(email)) {
             return res.json({
@@ -37,8 +35,7 @@ router.post('/auth/register', async (req, res) => {
                 'msg': 'El email no es valido'
             });
         }
-
-        if(password_hash.length < 8){
+        if(password.length < 8){
             return res.json({
                 'status':400,
                 'msg': 'La contraseña debe tener al menos 8 caracteres'
@@ -46,6 +43,7 @@ router.post('/auth/register', async (req, res) => {
         }
 
         db = await connect();
+        await db.beginTransaction();
 
         
         const queryCheck = `SELECT * FROM users WHERE email = ?`;
@@ -60,24 +58,22 @@ router.post('/auth/register', async (req, res) => {
 
         
         const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password_hash, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        
-        const queryInsertUser = `INSERT INTO users (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)`;
+        const queryInsertUser = `INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)`;
         const [userResult] = await db.execute(queryInsertUser, [first_name, last_name, email, hashedPassword]);
 
         const userId = userResult.insertId;
 
-       
-        const queryCreateAccount = `INSERT INTO accounts (user_id, balance) VALUES (?, ?)`;
-        const [accountResult] = await db.execute(queryCreateAccount, [userId, BASE_BALANCE]);
+        const queryCreateAccount = `INSERT INTO accounts (user_id, balance, currency) VALUES (?, ?, ?)`;
+        const [accountResult] = await db.execute(queryCreateAccount, [userId, BASE_BALANCE, 'MXN']);
 
         const qrCodeImage = await generateQRCode(accountResult.insertId);
 
         const queryInsertQRCode = `INSERT INTO qr_codes (account_id, qr_data) VALUES (?, ?)`;
         await db.execute(queryInsertQRCode, [accountResult.insertId, qrCodeImage]);
 
-
+        await db.commit();
         res.json({
             'status': 200,
             'msg': 'Usuario creado correctamente',
@@ -86,6 +82,7 @@ router.post('/auth/register', async (req, res) => {
             'initial_balance': BASE_BALANCE
         });
     } catch (err) {
+        await db.rollback();
         console.error(err);
         res.json({
             'status': 500,
@@ -94,15 +91,13 @@ router.post('/auth/register', async (req, res) => {
     }
 });
 
-
-
 router.post('/auth/login', async (req, res) => {
     let db;
     try {
       
-        const {email, password_hash} = req.body;
+        const {email, password} = req.body;
 
-        if(!email || !password_hash){
+        if(!email || !password){
             return res.json({
                 'status':400,
                 'msg': 'Todos los campos son obligatorios'
@@ -122,8 +117,8 @@ router.post('/auth/login', async (req, res) => {
             });
         } 
         const user =row[0];
-        const hashPassword = user.password_hash;
-        const passwordValid = await bcrypt.compare(password_hash, hashPassword);
+        const hashPassword = user.password;
+        const passwordValid = await bcrypt.compare(password, hashPassword);
         console.log("Resultado de la comparación:", passwordValid);
 
         if(!passwordValid) {
@@ -134,10 +129,15 @@ router.post('/auth/login', async (req, res) => {
         });
         } const token = jwt.sign(
             { email: user.email, user_id: user.user_id },
-            process.env.JWT_SECRET || 'default_secret',
+            'secret',
             { expiresIn: '1h' }
 
-        );
+        ); 
+
+            const deviceInfo = req.headers['user-agent'] || 'Desconocido';
+
+            const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
+            await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
 
             res.json({
                 'status': 200,

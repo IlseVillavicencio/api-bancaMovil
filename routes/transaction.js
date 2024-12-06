@@ -1,13 +1,15 @@
 const connect = require("../db");
-const router = require("./usuarios");
+const express = require('express');
+const authVerify = require('../middleware/authVerify');
+const router = express.Router(); 
 
-
-router.post('/transfer', authenticateToken, async (req, res) => {
+router.post('/transfer', authVerify, async (req, res) => {
+    console.log("User in request:", req.user_id);
     const{amount, qr_id, concept} = req.body;
     let db;
 
     try{
-        if(!amount || !qr_id) {
+        if(!amount || !qr_id || !concept) {
             return res.json ({
                 'status': 400,
                 'msg': 'Todos los campos son obligatorios'
@@ -16,8 +18,10 @@ router.post('/transfer', authenticateToken, async (req, res) => {
 
         db = await connect();
 
+
         const queryReceiverAccount = `SELECT account_id FROM qr_codes WHERE qr_id = ?`;
         const [receiverAccount] = await db.execute(queryReceiverAccount, [qr_id]);
+        
 
         if (receiverAccount.length === 0) {
             return res.json({
@@ -26,29 +30,39 @@ router.post('/transfer', authenticateToken, async (req, res) => {
             });
         }
 
+
         const receiverAccountId = receiverAccount[0].account_id;
+        
 
-        const queryBalance = `SELECT balance FROM accounts WHERE account_id = ?`;
-        const [senderAccount] = await db.execute(queryBalance, [req.user.account_id]);
+        await db.beginTransaction();
+        
 
-        if(senderAccount[0].balance < amount) {
-            return res.json({
-                'status':400,
-                'msg': 'No cuentas con el saldo suficiente'
-            });
+        try{
+            const queryTransfer = `INSERT INTO transfers (from_account_id, to_account_id, amount) VALUES (?, ?, ?)`;
+            await db.execute(queryTransfer, [req.user_id, receiverAccountId, amount]);
 
-        }
+            const querySenderTrans = `INSERT INTO transactions (account_id, type, amount, concept, reference, created_at) VALUES (?, 'Transfer', ?, ?, ?, NOW())`;
+            await db.execute(querySenderTrans, [req.user_id, amount, concept, qr_id]);
 
-        const queryTransacction = `INSERT INTO transacctions(account_id, transaction_type, amount, concept, qr_id) VALUES(?, 'TRANSFER', ?, ?, ?)`;
-        await db.execute(queryTransacction, [req.user.account_id, amount, concept, qr_id]);
+            const queryReceiverTrans = `INSERT INTO transactions (account_id, type, amount, concept, reference, created_at) VALUES (?, 'Receive', ?, ?, ?, NOW())`;
+            await db.execute(queryReceiverTrans, [receiverAccountId, amount, concept, qr_id]);
 
-        //Falta agregar la actualizacion de la cuenta luega de la transferencia
+            await db.commit();
 
 
         res.json({
             'status':200,
             'msg': 'Transferencia realizada con éxito'
         });
+
+    } catch(err) {
+        console.error('Error en la transacción:', err); 
+        await db.rollback();
+        res.json({
+            'status': 500,
+            'msg': 'Error al procesar la transferencia. Intentelo más tarde'
+        });
+    }
     } catch(err){
         console.error(err);
         res.json({
