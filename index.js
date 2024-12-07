@@ -20,6 +20,11 @@ app.use(transaction);
 app.use(history);
 app.use(generate_qr);
 
+app.get('/', (req, res) => {
+    res.send('API funcionando');
+});
+
+
 app.listen(PORT, () => {
     console.log(`Escuchando por el puerto ${PORT}`); 
     //console.log("Escuchando por el puerto " + PORT); 
