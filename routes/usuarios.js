@@ -23,6 +23,26 @@ router.get('/users', async (req, res) =>{
     }
 });
 
+router.get('/qr_codes', async (req, res) =>{
+    let db;
+    try {
+        db = await connect();
+        const query = `SELECT * FROM qr_codes WHERE account_id = ?`;
+        const [row] = await db.execute(query);
+        console.log(row);
+        res.json({
+            'status': 200,
+            'users': row
+        });
+    } catch(err) {
+        console.log(err);
+        res.json({
+            'status': 500,
+            'msg': 'Error getting users'
+        });
+    }
+});
+
 
 
 //Email
