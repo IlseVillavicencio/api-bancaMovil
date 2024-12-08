@@ -21,11 +21,11 @@ app.use(history);
 app.use(generate_qr);
 
 app.get('/', (req, res) => {
-    res.send('API funcionando');
+    res.send('API working');
 });
 
 
 app.listen(PORT, () => {
-    console.log(`Escuchando por el puerto ${PORT}`); 
+    console.log(`Listening by the port ${PORT}`); 
     //console.log("Escuchando por el puerto " + PORT); 
 });

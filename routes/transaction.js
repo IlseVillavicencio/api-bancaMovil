@@ -4,7 +4,6 @@ const authVerify = require('../middleware/authVerify');
 const router = express.Router(); 
 
 router.post('/transfer', authVerify, async (req, res) => {
-    console.log("User in request:", req.user_id);
     const{amount, qr_id, concept} = req.body;
     let db;
 
@@ -12,7 +11,7 @@ router.post('/transfer', authVerify, async (req, res) => {
         if(!amount || !qr_id || !concept) {
             return res.json ({
                 'status': 400,
-                'msg': 'Todos los campos son obligatorios'
+                'msg': 'All fields are required'
             });
         }
 
@@ -26,7 +25,7 @@ router.post('/transfer', authVerify, async (req, res) => {
         if (receiverAccount.length === 0) {
             return res.json({
                 'status': 400,
-                'msg': 'El codigo QR no corresponde a ninguna cuenta'
+                'msg': 'The QR code does not correspond to any account'
             });
         }
 
@@ -52,22 +51,22 @@ router.post('/transfer', authVerify, async (req, res) => {
 
         res.json({
             'status':200,
-            'msg': 'Transferencia realizada con éxito'
+            'msg': 'Transfer completed successfully'
         });
 
     } catch(err) {
-        console.error('Error en la transacción:', err); 
+        console.error('Transaction error:', err); 
         await db.rollback();
         res.json({
             'status': 500,
-            'msg': 'Error al procesar la transferencia. Intentelo más tarde'
+            'msg': 'Error processing the transfer. Try again later.'
         });
     }
     } catch(err){
         console.error(err);
         res.json({
             'status': 500,
-            'msg': 'Error en el servidor'
+            'msg': 'Server error'
         });
     }
 });

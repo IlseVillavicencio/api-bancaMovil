@@ -16,12 +16,12 @@ router.get('/transactions/history', authVerify, async (req, res) => {
         if(transactions.length === 0) {
             return res.json({
                 'status':404,
-                'msg': 'No se encontraron transacciones en esta cuenta'
+                'msg': 'No transactions found in this account'
 
             });
         } res.json({
             'status':200,
-            'msg': 'Historial de transacciones',
+            'msg': 'Transaction history',
             'transactions': transactions
         });
 
@@ -29,7 +29,7 @@ router.get('/transactions/history', authVerify, async (req, res) => {
         console.error(err);
         res.json({
             'status':500,
-            'msg': 'Error en el servidor'
+            'msg': 'Server error'
         });
     }
 

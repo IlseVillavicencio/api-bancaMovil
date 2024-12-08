@@ -4,7 +4,7 @@ function authVerify(req, res, next) {
     const token = req.header('Authorization');
     
     if(!token)
-        return res.status(401).json({'error': 'No tiene permiso para ingresar'});
+        return res.status(401).json({'Error': 'You do not have permission to enter'});
     bearer = token.split(' ')[1];
     try {
         const decoded = jwt.verify(bearer, 'secret');
@@ -13,7 +13,7 @@ function authVerify(req, res, next) {
         req.user_id = decoded.user_id;
         next();
     } catch(err) {
-        return res.status(401).json({'error': 'Ocurrió un error volver a intentarlo' + err});
+        return res.status(401).json({'Error': 'An error occurred try again' + err});
     }
 }
 

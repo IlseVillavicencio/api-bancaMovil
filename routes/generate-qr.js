@@ -14,14 +14,14 @@ router.post('/generate-qr', authVerify, async (req, res) => {
         if(!qr_data) {
             return res.json({
                 'status':400,
-                'msg': 'Todos los datos son obligatorios'
+                'msg': 'All data is mandatory'
             });
         }
 
         if(!accountId){
             return res.json({
                 'status': 400,
-                'msg': 'No se encontro la cuenta asociada a este usuario'
+                'msg': 'The account associated with this user was not found'
             });
         }
 
@@ -35,7 +35,7 @@ router.post('/generate-qr', authVerify, async (req, res) => {
 
         res.json({
             'status':200,
-            'msg': 'Codigo QR generado con exito',
+            'msg': 'QR code generated successfully',
             'qrCodeImage': qrCodeImage,
             'qrData': qrData
 
@@ -45,7 +45,7 @@ router.post('/generate-qr', authVerify, async (req, res) => {
         console.error(err);
         res.json({
             'status':500,
-            'msg': 'Error en el servidor'
+            'msg': 'Server error'
         });
     }
 

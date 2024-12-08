@@ -11,11 +11,11 @@ async function connect() {
             'database': process.env.MYSQLDATABASE
         });
 
-        console.log('Conexion creada');
+        console.log('Connection created');
         return conn;
 
     } catch(err) {
-        console.log('Ocurrio un error al intentar realizar la conexion: ' + err);
+        console.log('An error occurred while trying to connect: ' + err);
         throw err;
     }
 }

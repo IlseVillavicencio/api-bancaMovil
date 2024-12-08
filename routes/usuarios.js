@@ -18,7 +18,7 @@ router.get('/users', async (req, res) =>{
         console.log(err);
         res.json({
             'status': 500,
-            'msg': 'Error al obtener los usuarios'
+            'msg': 'Error getting users'
         });
     }
 });
@@ -39,7 +39,7 @@ router.get('/users/:email', async (req, res) => {
         if(row.length === 0) {
             return res.json({
                 'status':404,
-                'msg': 'Usuario no encontrado'
+                'msg': 'User not found'
             })
         } res.json({
             'status': 200,
@@ -50,7 +50,7 @@ router.get('/users/:email', async (req, res) => {
         console.log(err);
         res.json({
             'status':500,
-            'msg': 'Error al obtener el usuario. Intentelo más tarde.'
+            'msg': 'Error getting user. Please try again later.'
         })
     }
 });
@@ -70,7 +70,7 @@ router.get('/users/:first_name', async (req, res) => {
         if(row.length === 0) {
             return res.json({
                 'status':404,
-                'msg': 'Usuario no encontrado'
+                'msg': 'User not found.'
             })
         } res.json({
             'status': 200,
@@ -81,7 +81,7 @@ router.get('/users/:first_name', async (req, res) => {
         console.log(err);
         res.json({
             'status':500,
-            'msg': 'Error al obtener el usuario. Intentelo más tarde.'
+            'msg': 'Error getting user. Please try again later.'
         })
     }
 });
@@ -101,7 +101,7 @@ router.get('/users/:last_name', async (req, res) => {
         if(row.length === 0) {
             return res.json({
                 'status':404,
-                'msg': 'Usuario no encontrado'
+                'msg': 'User not found'
             })
         } res.json({
             'status': 200,
@@ -112,7 +112,7 @@ router.get('/users/:last_name', async (req, res) => {
         console.log(err);
         res.json({
             'status':500,
-            'msg': 'Error al obtener el usuario. Intentelo más tarde.'
+            'msg': 'Error getting user. Please try again later.'
         })
     }
 });
@@ -131,7 +131,7 @@ router.delete('/users/:email', authVerify, async (req, res) => {
             res.json({
                 'users': [],
                 'status': 404,
-                'msg': 'Email no encontrado',
+                'msg': 'Email not found',
             });
         } else {
             res.json({
@@ -144,7 +144,7 @@ router.delete('/users/:email', authVerify, async (req, res) => {
     }
 });
 
-// Actualizar usuario (email, last_name, password) por email
+// Update user (email, last_name, password) by email
 router.put('/users/:email', async (req, res) => {
     const email = req.params.email;
     const {last_name, new_email, password} = req.body;
@@ -152,7 +152,7 @@ router.put('/users/:email', async (req, res) => {
     try {
         db = await connect();
 
-        // Actualización de email
+        // Email update
         if (new_email) {
             const query = `UPDATE users SET email = ? WHERE email = ?`;
             const [rows] = await db.execute(query, [new_email, email]);
@@ -164,27 +164,27 @@ router.put('/users/:email', async (req, res) => {
             }
             return res.json({
                 'status': 200,
-                'msg': 'Email actualizado',
+                'msg': 'Updated email',
             });
         }
 
-        // Actualizar apellido
+        // Update last name
         if (last_name) {
             const query = `UPDATE users SET last_name = ? WHERE email = ?`;
             const [rows] = await db.execute(query, [last_name, email]);
             if (rows.affectedRows === 0) {
                 return res.json({
                     'status': 404,
-                    'msg': 'Email no encontrado',
+                    'msg': 'Email not found',
                 });
             }
             return res.json({
                 'status': 200,
-                'msg': 'Apellido actualizado',
+                'msg': 'Last name updated',
             });
         }
 
-        // actualizar contraseña
+        // update password
         if (password) {
             const bcrypt = require('bcrypt');
             const saltRounds = 10;
@@ -196,25 +196,25 @@ router.put('/users/:email', async (req, res) => {
             if (rows.affectedRows === 0) {
                 return res.json({
                     'status': 404,
-                    'msg': 'Email no encontrado',
+                    'msg': 'Email not found',
                 });
             }
             return res.json({
                 'status': 200,
-                'msg': 'Contraseña actualizada',
+                'msg': 'Updated password',
             });
         }
 
         return res.json({
             'status': 400,
-            'msg': 'No se proporcionó ningún campo válido para actualizar',
+            'msg': 'No valid field provided to update',
         });
 
     } catch (err) {
         console.log(err);
         return res.json({
             'status': 500,
-            'msg': 'Error al actualizar el usuario'
+            'msg': 'Error updating user'
         });
     }
 });
