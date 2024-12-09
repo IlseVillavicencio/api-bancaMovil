@@ -26,9 +26,10 @@ router.get('/users', async (req, res) =>{
 router.get('/users/qr_codes', async(req, res) => {
     let db;
     try{
+        const { account_id } = req.query;
         db = await connect();
         const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
-        const [rows] = await db.execute(query, [account_id]);
+        const [rows] = await db.execute(query, [account_id], [qr_id], [qr_data]);
 
         console.log('Resultado de la consulta:', rows);
 
@@ -36,10 +37,7 @@ router.get('/users/qr_codes', async(req, res) => {
             const qrData = rows[0];
             return res.json({
                 'status': 200,
-                'qr_data': {
-                    'qr_id': qrData.qr_id,
-                    'image_base64': qrData.qr_data, 
-                },
+                'users': {rows},
             });
         } else {
             return res.json({
