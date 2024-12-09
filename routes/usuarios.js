@@ -23,6 +23,49 @@ router.get('/users', async (req, res) =>{
     }
 });
 
+router.get('/users/qr_codes', async(req, res) => {
+    let db;
+    try{
+        db = await connect();
+        const account_id = req.headers['account_id'];
+        console.log('Encabezado recibido', account_id);
+
+        if(!account_id){
+            return res.json({
+                'status':400,
+                'msg': 'El account es obligatorio',
+            });
+        }
+
+        const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
+        const [rows] = await db.execute(query, [account_id]);
+
+        console.log('Resultado de la consulta:', rows);
+
+        if(rows.length > 0) {
+            const qrData = rows[0];
+            return res.json({
+                'status': 200,
+                'qr_data': {
+                    'qr_id': qrData.qr_id,
+                    'image_base64': qrData.qr_data, 
+                },
+            });
+        } else {
+            return res.json({
+                'status':400,
+                'msg': 'No se encontro un QR',
+            });
+        }
+    } catch(err) {
+        console.error('Error al obtener los datos QR: ', err);
+        return res.json({
+            'status':500,
+            'msg': 'Error'
+        });
+    }
+});
+
 //Email
 router.get('/users/:email', async (req, res) => {
     const email = req.params.email;
