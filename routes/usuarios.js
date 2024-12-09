@@ -31,14 +31,13 @@ router.get('/users/qr_codes', async(req, res) => {
         if (!account_id) {
             return res.status(400).json({
                 status: 400,
-                msg: 'El parámetro account_id es requerido',
+                msg: 'All fields are required',
             });
         }
         db = await connect();
         const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
         const [rows] = await db.execute(query, [account_id]);
 
-        console.log('Resultado de la consulta:', rows);
 
         if(rows.length > 0) {
             const qrData = rows[0];
@@ -49,11 +48,11 @@ router.get('/users/qr_codes', async(req, res) => {
         } else {
             return res.json({
                 'status':400,
-                'msg': 'No se encontro un QR',
+                'msg': 'No QR found',
             });
         }
     } catch(err) {
-        console.error('Error al obtener los datos QR: ', err);
+        console.error('Error obtaining QR data:', err);
         return res.json({
             'status':500,
             'msg': 'Error'
