@@ -27,16 +27,6 @@ router.get('/users/qr_codes', async(req, res) => {
     let db;
     try{
         db = await connect();
-        const account_id = req.headers['account_id'];
-        console.log('Encabezado recibido', account_id);
-
-        if(!account_id){
-            return res.json({
-                'status':400,
-                'msg': 'El account es obligatorio',
-            });
-        }
-
         const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
         const [rows] = await db.execute(query, [account_id]);
 
