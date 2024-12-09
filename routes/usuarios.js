@@ -23,53 +23,6 @@ router.get('/users', async (req, res) =>{
     }
 });
 
-router.get('/qr_codes', async (req, res) => {
-    let db;
-    try {
-        db = await connect();
-
-        // Validar el encabezado `account_id`
-        const account_id = req.headers['account_id'];
-        console.log('account_id recibido:', account_id);
-
-        // Consulta para obtener los datos del QR
-        const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
-        const [rows] = await db.execute(query, [account_id]);
-
-        console.log('Resultado de la consulta:', rows);
-
-        // Verifica si se encontraron resultados
-        if (rows.length === 0) {
-            return res.status(404).json({
-                status: 404,
-                msg: 'No se encontró un código QR para este account_id.',
-            });
-        }
-
-        // Devuelve el primer resultado
-        const qrData = rows[0];
-
-        return res.status(200).json({
-            status: 200,
-            qr_data: {
-                qr_id: qrData.qr_id,
-                image_base64: qrData.qr_data, // Asegúrate de que este campo sea un string codificado en base64
-            },
-        });
-    } catch (err) {
-        console.error('Error al obtener los datos del QR:', err);
-        return res.status(500).json({
-            status: 500,
-            msg: 'Error al obtener los datoss del código QR.',
-        });
-    } finally {
-        // Cierra la conexión a la base de datos
-        if (db) {
-            await db.end();
-        }
-    }
-});
-
 //Email
 router.get('/users/:email', async (req, res) => {
     const email = req.params.email;
