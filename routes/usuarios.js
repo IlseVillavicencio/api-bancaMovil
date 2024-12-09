@@ -32,13 +32,6 @@ router.get('/qr_codes', async (req, res) => {
         const account_id = req.headers['account_id'];
         console.log('account_id recibido:', account_id);
 
-        if (!account_id) {
-            return res.status(400).json({
-                status: 400,
-                msg: 'El encabezado account_id es obligatorio.',
-            });
-        }
-
         // Consulta para obtener los datos del QR
         const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
         const [rows] = await db.execute(query, [account_id]);
