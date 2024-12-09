@@ -24,6 +24,7 @@ router.get('/users', async (req, res) =>{
     }
 });
 
+//Para obtener los datos de qr_id
 router.get('/users/qr_codes', async(req, res) => {
     let db;
     try{
