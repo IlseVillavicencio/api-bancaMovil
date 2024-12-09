@@ -28,22 +28,21 @@ router.get('/qr_codes', async (req, res) => {
     try {
       db = await connect();
   
-      // Suponemos que el account_id se pasa como parámetro en la URL o en las cabeceras
+     
       const account_id = req.headers['account_id'];
   
-      // Consulta para obtener qr_data y qr_id
       const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
       const [rows] = await db.execute(query, [account_id]);
   
       if (rows.length > 0) {
-        // Si existe el qr_data, devolvemos los datos como un objeto JSON
-        const qrData = rows[0]; // Tomamos el primer resultado
+       
+        const qrData = rows[0]; 
   
         res.json({
           status: 200,
           qr_data: {
             qr_id: qrData.qr_id,
-            image_base64: qrData.qr_data, // Asumimos que qr_data ya está en base64
+            image_base64: qrData.qr_data, 
           },
         });
       } else {
@@ -61,32 +60,32 @@ router.get('/qr_codes', async (req, res) => {
     }
   });
 
-router.get('/account', async (req, res) => {
+  router.get('/account', async (req, res) => {
     let db;
-
     try {
-        
         db = await connect();
 
-        
         const accountId = req.headers['account_id'];
+        console.log("account_id recibido:", accountId); 
+
         if (!accountId) {
+            console.log("No se envió el account_id en los encabezados");
             return res.status(400).json({ status: 400, msg: "account_id is required" });
         }
 
-       
         const query = 'SELECT * FROM accounts WHERE account_id = ?';
         const [rows] = await db.execute(query, [accountId]);
+        console.log("Resultado de la consulta:", rows); 
 
         if (rows.length === 0) {
+            console.log("No se encontró la cuenta para el account_id:", accountId);
             return res.status(404).json({ status: 404, msg: "Account not found" });
         }
 
-    
         return res.status(200).json({
             status: 200,
             msg: "Account retrieved successfully",
-            account: rows[0], 
+            account: rows[0],
         });
 
     } catch (error) {
@@ -98,7 +97,6 @@ router.get('/account', async (req, res) => {
         }
     }
 });
-
 
 //Email
 router.get('/users/:email', async (req, res) => {
