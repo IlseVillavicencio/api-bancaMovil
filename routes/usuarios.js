@@ -91,26 +91,54 @@ router.get('/users/:email', async (req, res) => {
     }
 });
 
-router.get('/users/qr_token', async(req, res) => {
+router.get('/users/qr_token', async (req, res) => {
     let db;
     try {
-        db = await connect();
-        const response = await fetch('https://api-bancamovil-production.up.railway.app/qr_codes', {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        const data = await response.json();
-    
-        if (data.status === 200) {
-          setAccountNumber(data.qr_data.qr_id);
-        } else {
-          console.error('Error al obtener el QR:', data.msg);
+        
+        const token = req.headers['authorization']?.split(' ')[1]; 
+        
+        if (!token) {
+            return res.json({ 
+                'status': 401, 
+                'msg': 'Token is required for authentication' 
+            });
         }
-      } catch (err) {
-        console.error('Error al hacer fetch:', err);
-      }
+
+        const decoded = jwt.verify(token, 'secret');
+        if (!decoded) {
+            return res.status(401).json({ status: 401, msg: 'Invalid token' });
+        }
+
+        // Conectar a la base de datos
+        db = await connect();
+        
+        
+        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = ?`; // Asegúrate de tener el user_id correcto
+        const [rows] = await db.execute(query, [decoded.user_id], qr_id, qr_data);
+
+        if (rows.length > 0) {
+            const qrData = rows[0];
+            return res.json({
+                'status': 200,
+                'qr_data': {
+                    qr_id: qrData.qr_id,
+                    image_base64: qrData.qr_data
+                }
+            });
+        } else {
+            return res.status(404).json({
+                status: 404,
+                msg: 'QR not found for this user'
+            });
+        }
+
+    } catch (err) {
+        console.error('Error:', err);
+        return res.json({
+            'status': 500,
+            'msg': 'Error fetching QR data',
+        });
+    }
 });
 
 //first_name
