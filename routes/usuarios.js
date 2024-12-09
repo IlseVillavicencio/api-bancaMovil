@@ -67,7 +67,7 @@ router.get('/qr_codes', async (req, res) => {
         console.error('Error al obtener los datos del QR:', err);
         return res.status(500).json({
             status: 500,
-            msg: 'Error al obtener los datos del código QR.',
+            msg: 'Error al obtener los datoss del código QR.',
         });
     } finally {
         // Cierra la conexión a la base de datos
