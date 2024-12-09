@@ -2,6 +2,7 @@ const { Router } = require('express');
 const connect = require('../db');
 const router = Router();
 const authVerify = require('../middleware/authVerify');
+const fetch = require('node-fetch');
 
 router.get('/users', async (req, res) =>{
     let db;
@@ -93,17 +94,12 @@ router.get('/users/:email', async (req, res) => {
 router.get('/users/qr_token', async(req, res) => {
     let db;
     try {
-        if (!token) {
-            return res.status(401).json({ status: 401, msg: 'Unauthorized' });
-          }
-        
         db = await connect();
-        const token = await AsyncStorage.getItem('userToken'); 
         const response = await fetch('https://api-bancamovil-production.up.railway.app/qr_codes', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
         const data = await response.json();
     
