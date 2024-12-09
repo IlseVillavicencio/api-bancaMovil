@@ -143,6 +143,10 @@ router.post('/auth/login', async (req, res) => {
                 'status': 200,
                 'token': token, 
                 'msg': 'Successful login',
+                'user': {
+                'email': user.email,
+                'user_id': user.user_id,
+    },
             });
         } catch(err) {
             console.log(err);
