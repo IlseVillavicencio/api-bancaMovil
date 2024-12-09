@@ -2,6 +2,7 @@ const { Router } = require('express');
 const connect = require('../db');
 const router = Router();
 const authVerify = require('../middleware/authVerify');
+app.use(express.json());
 
 router.get('/users', async (req, res) =>{
     let db;
@@ -26,8 +27,8 @@ router.get('/users', async (req, res) =>{
 router.get('/users/qr_codes', async(req, res) => {
     let db;
     try{
-        const { account_id } = req.query;
-        
+        const account_id = req.body.account_id || req.query.account_id || req.params.account_id;
+
         if (!account_id) {
             return res.status(400).json({
                 status: 400,
