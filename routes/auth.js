@@ -3,6 +3,7 @@ const connect = require('../db');
 const bcrypt = require('bcrypt');
 const router = Router();
 const jwt = require('jsonwebtoken');
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const QRCode = require('qrcode');
@@ -133,6 +134,8 @@ router.post('/auth/login', async (req, res) => {
             { expiresIn: '1h' }
 
         ); 
+
+            await AsyncStorage.setItem('userToken', token);
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
 
