@@ -2,7 +2,6 @@ const { Router } = require('express');
 const connect = require('../db');
 const router = Router();
 const authVerify = require('../middleware/authVerify');
-app.use(express.json());
 
 router.get('/users', async (req, res) =>{
     let db;
