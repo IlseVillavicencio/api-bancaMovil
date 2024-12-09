@@ -61,7 +61,7 @@ router.get('/qr_codes', async (req, res) => {
     }
   });
 
-router.get('/get-account', (req, res) => {
+router.get('/account', (req, res) => {
     
     const accountId = req.headers['account_id'];
     
