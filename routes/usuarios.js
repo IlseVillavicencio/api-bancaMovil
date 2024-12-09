@@ -61,26 +61,42 @@ router.get('/qr_codes', async (req, res) => {
     }
   });
 
-router.get('/account', (req, res) => {
+router.get('/account', async (req, res) => {
+    let db;
+
+    try {
+        
+        db = await connect();
+
+        
+        const accountId = req.headers['account_id'];
+        if (!accountId) {
+            return res.status(400).json({ status: 400, msg: "account_id is required" });
+        }
+
+       
+        const query = 'SELECT * FROM accounts WHERE account_id = ?';
+        const [rows] = await db.execute(query, [accountId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ status: 404, msg: "Account not found" });
+        }
+
     
-    const accountId = req.headers['account_id'];
-    
-    if (!accountId) {
-        return res.status(400).json({ status: 400, msg: "account_id is required" });
+        return res.status(200).json({
+            status: 200,
+            msg: "Account retrieved successfully",
+            account: rows[0], 
+        });
+
+    } catch (error) {
+        console.error('Error al procesar la solicitud:', error);
+        return res.status(500).json({ status: 500, msg: "Internal server error" });
+    } finally {
+        if (db) {
+            db.end(); 
+        }
     }
-
-    const accountInfo = accounts[accountId];
-
-    if (!accountInfo) {
-        return res.status(404).json({ status: 404, msg: "Account not found" });
-    }
-
-    return res.status(200).json({
-        status: 200,
-        msg: "Account retrieved successfully",
-        account: accountInfo,
-    });
-
 });
 
 
