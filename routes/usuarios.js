@@ -91,54 +91,6 @@ router.get('/users/:email', async (req, res) => {
     }
 });
 
-router.get('/users/qr_token', async (req, res) => {
-    let db;
-    try {
-        
-        const token = req.headers['authorization']?.split(' ')[1]; 
-        
-        if (!token) {
-            return res.json({ 
-                'status': 401, 
-                'msg': 'Token is required for authentication' 
-            });
-        }
-
-        const decoded = jwt.verify(token, 'secret');
-        console.log(decoded);
-
-        if (!decoded) {
-            return res.status(401).json({ status: 401, msg: 'Invalid token' });
-        }
-
-        db = await connect();
-        
-        
-        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = ?;`;
-        const [rows] = await db.execute(query, [decoded.user_id], qr_id, qr_data);
-
-        if (rows.length > 0) {
-            const qrData = rows[0];
-            return res.json({
-                'status': 200,
-                'user': {rows}
-            });
-        } else {
-            return res.status(404).json({
-                status: 404,
-                msg: 'QR not found for this user'
-            });
-        }
-
-    } catch (err) {
-        console.error('Error:', err);
-        return res.json({
-            'status': 500,
-            'msg': 'Error fetching QR data',
-        });
-    }
-});
-
 //first_name
 
 router.get('/users/:first_name', async (req, res) => {
