@@ -3,7 +3,7 @@ const connect = require('../db');
 const bcrypt = require('bcrypt');
 const router = Router();
 const jwt = require('jsonwebtoken');
-import AsyncStorage from '@react-native-async-storage/async-storage';
+const AsyncStorage = require('@react-native-async-storage/async-storage');
 
 
 const QRCode = require('qrcode');
