@@ -93,6 +93,10 @@ router.get('/users/:email', async (req, res) => {
 router.get('/users/qr_token', async(req, res) => {
     let db;
     try {
+        if (!token) {
+            return res.status(401).json({ status: 401, msg: 'Unauthorized' });
+          }
+        
         db = await connect();
         const token = await AsyncStorage.getItem('userToken'); 
         const response = await fetch('https://api-bancamovil-production.up.railway.app/qr_codes', {
