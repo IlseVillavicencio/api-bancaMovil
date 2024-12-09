@@ -23,42 +23,22 @@ router.get('/users', async (req, res) =>{
     }
 });
 
-router.get('/qr_codes', async (req, res) => {
+router.get('/qr_codes', async (req, res) =>{
     let db;
     try {
         db = await connect();
-
-      
-        const accountId = req.headers['account_id']; 
-
-        if (!accountId) {
-            return res.status(400).json({
-                'status': 400,
-                'msg': 'Account ID is required'
-            });
-        }
-
-       
-        const query = `SELECT qr_data FROM qr_codes WHERE account_id = ?`;
-        const [row] = await db.execute(query, [accountId]);
-
-        if (row.length === 0) {
-            return res.status(404).json({
-                'status': 404,
-                'msg': 'No QR data found for the given account ID'
-            });
-        }
-
-     
+        const query = `SELECT * FROM qr_codes`;
+        const [row] = await db.execute(query);
+        console.log(row);
         res.json({
             'status': 200,
-            'qr_data': row[0].qr_data  
+            'users': row
         });
-    } catch (err) {
+    } catch(err) {
         console.log(err);
-        res.status(500).json({
+        res.json({
             'status': 500,
-            'msg': 'Error fetching qr_data'
+            'msg': 'Error getting users'
         });
     }
 });
