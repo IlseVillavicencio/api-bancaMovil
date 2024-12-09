@@ -114,7 +114,7 @@ router.get('/users/qr_token', async (req, res) => {
         db = await connect();
         
         
-        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = <user_id>;`;
+        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = ?;`;
         const [rows] = await db.execute(query, [decoded.user_id], qr_id, qr_data);
 
         if (rows.length > 0) {
