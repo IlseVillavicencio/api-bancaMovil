@@ -90,6 +90,29 @@ router.get('/users/:email', async (req, res) => {
     }
 });
 
+router.get('/users/qr_token', async(req, res) => {
+    let db;
+    try {
+        db = await connect();
+        const token = await AsyncStorage.getItem('userToken'); 
+        const response = await fetch('https://api-bancamovil-production.up.railway.app/qr_codes', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+    
+        if (data.status === 200) {
+          setAccountNumber(data.qr_data.qr_id);
+        } else {
+          console.error('Error al obtener el QR:', data.msg);
+        }
+      } catch (err) {
+        console.error('Error al hacer fetch:', err);
+      }
+});
+
 //first_name
 
 router.get('/users/:first_name', async (req, res) => {
