@@ -26,77 +26,56 @@ router.get('/users', async (req, res) =>{
 router.get('/qr_codes', async (req, res) => {
     let db;
     try {
+      // Conexión a la base de datos
       db = await connect();
   
-     
+      // Obtén el account_id desde los encabezados
       const account_id = req.headers['account_id'];
+      console.log('account_id recibido:', account_id);
   
+      if (!account_id) {
+        return res.status(400).json({
+          status: 400,
+          msg: 'account_id header is required',
+        });
+      }
+  
+      // Consulta para obtener los datos del QR
       const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
       const [rows] = await db.execute(query, [account_id]);
   
-      if (rows.length > 0) {
-       
-        const qrData = rows[0]; 
+      console.log('Resultado de la consulta:', rows);
   
-        res.json({
+      // Verifica si se encontraron resultados
+      if (rows.length > 0) {
+        const qrData = rows[0]; // Toma el primer resultado
+  
+        return res.status(200).json({
           status: 200,
           qr_data: {
             qr_id: qrData.qr_id,
-            image_base64: qrData.qr_data, 
+            image_base64: qrData.qr_data, // Asegúrate de que este campo sea un string codificado en base64
           },
         });
       } else {
-        res.json({
+        return res.status(404).json({
           status: 404,
           msg: 'QR not found for this account_id',
         });
       }
     } catch (err) {
-      console.log(err);
-      res.json({
+      console.error('Error al obtener los datos del QR:', err);
+      return res.status(500).json({
         status: 500,
         msg: 'Error getting QR data',
       });
+    } finally {
+      // Cierra la conexión a la base de datos
+      if (db) {
+        db.end();
+      }
     }
   });
-
-  router.get('/account', async (req, res) => {
-    let db;
-    try {
-        db = await connect();
-
-        const accountId = req.headers['account_id'];
-        console.log("account_id recibido:", accountId); 
-
-        if (!accountId) {
-            console.log("No se envió el account_id en los encabezados");
-            return res.status(400).json({ status: 400, msg: "account_id is required" });
-        }
-
-        const query = 'SELECT * FROM accounts WHERE account_id = ?';
-        const [rows] = await db.execute(query, [accountId]);
-        console.log("Resultado de la consulta:", rows); 
-
-        if (rows.length === 0) {
-            console.log("No se encontró la cuenta para el account_id:", accountId);
-            return res.status(404).json({ status: 404, msg: "Account not found" });
-        }
-
-        return res.status(200).json({
-            status: 200,
-            msg: "Account retrieved successfully",
-            account: rows[0],
-        });
-
-    } catch (error) {
-        console.error('Error al procesar la solicitud:', error);
-        return res.status(500).json({ status: 500, msg: "Internal server error" });
-    } finally {
-        if (db) {
-            db.end(); 
-        }
-    }
-});
 
 //Email
 router.get('/users/:email', async (req, res) => {
