@@ -105,15 +105,16 @@ router.get('/users/qr_token', async (req, res) => {
         }
 
         const decoded = jwt.verify(token, 'secret');
+        console.log(decoded);
+
         if (!decoded) {
             return res.status(401).json({ status: 401, msg: 'Invalid token' });
         }
 
-        // Conectar a la base de datos
         db = await connect();
         
         
-        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = ?`; // Asegúrate de tener el user_id correcto
+        const query = `SELECT qr_id, qr_data FROM qr_codes WHERE user_id = ?`;
         const [rows] = await db.execute(query, [decoded.user_id], qr_id, qr_data);
 
         if (rows.length > 0) {
