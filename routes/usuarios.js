@@ -23,25 +23,43 @@ router.get('/users', async (req, res) =>{
     }
 });
 
-router.get('/qr_codes', async (req, res) =>{
+router.get('/qr_codes', async (req, res) => {
     let db;
     try {
-        db = await connect();
-        const query = `SELECT * FROM qr_codes`;
-        const [row] = await db.execute(query);
-        console.log(row);
+      db = await connect();
+  
+      // Suponemos que el account_id se pasa como parámetro en la URL o en las cabeceras
+      const account_id = req.headers['account_id'];
+  
+      // Consulta para obtener qr_data y qr_id
+      const query = 'SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?';
+      const [rows] = await db.execute(query, [account_id]);
+  
+      if (rows.length > 0) {
+        // Si existe el qr_data, devolvemos los datos como un objeto JSON
+        const qrData = rows[0]; // Tomamos el primer resultado
+  
         res.json({
-            'status': 200,
-            'users': row
+          status: 200,
+          qr_data: {
+            qr_id: qrData.qr_id,
+            image_base64: qrData.qr_data, // Asumimos que qr_data ya está en base64
+          },
         });
-    } catch(err) {
-        console.log(err);
+      } else {
         res.json({
-            'status': 500,
-            'msg': 'Error getting users'
+          status: 404,
+          msg: 'QR not found for this account_id',
         });
+      }
+    } catch (err) {
+      console.log(err);
+      res.json({
+        status: 500,
+        msg: 'Error getting QR data',
+      });
     }
-});
+  });
 
 
 
