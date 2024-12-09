@@ -133,6 +133,8 @@ router.post('/auth/login', async (req, res) => {
             { expiresIn: '1h' }
 
         ); 
+            const account_id = user.account_id;
+            const qr_id = user.qr_id; 
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
 
@@ -146,6 +148,8 @@ router.post('/auth/login', async (req, res) => {
                 'user': {
                 'email': user.email,
                 'user_id': user.user_id,
+                'account_id': account_id, 
+                'qr_id': qr_id
     },
             });
         } catch(err) {
