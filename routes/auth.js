@@ -128,18 +128,32 @@ router.post('/auth/login', async (req, res) => {
                 'token': null
         });
         } const token = jwt.sign(
-            { email: user.email, user_id: user.user_id },
+            { email: user.email, user_id: user.user_id, name: user.first_name},
             'secret',
             { expiresIn: '1h' }
 
         ); 
             const account_id = user.account_id;
             const qr_id = user.qr_id; 
+            if (qrResult.length > 0) {
+                qr_data = qrResult[0].qr_data;
+            }
+
+            
+            if (account_id) {
+                const queryAccount = `SELECT qr_data FROM qr_codes WHERE account_id = ?`;
+                const [qrResult] = await db.execute(queryAccount, [account_id]);
+
+                if (qrResult.length > 0) {
+                    qr_data = qrResult[0].qr_data;
+                }
+            }
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
 
             const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
             await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
+            await db.execute(queryAccount, [account_id])
 
             res.json({
                 'status': 200,
@@ -149,7 +163,8 @@ router.post('/auth/login', async (req, res) => {
                 'email': user.email,
                 'user_id': user.user_id,
                 'account_id': account_id, 
-                'qr_id': qr_id
+                'qr_id': qr_id,
+                'qr_data': qr_data
     },
             });
         } catch(err) {
