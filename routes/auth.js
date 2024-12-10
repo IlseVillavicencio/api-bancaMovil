@@ -143,8 +143,8 @@ router.post('/auth/login', async (req, res) => {
             const [qrResult] = await db.execute(queryAccount, [account_id]);
 
             if (qrResult.length > 0) {
-                qr_id = qrResult[0].qr_id;
-                qr_data = qrResult[0].qr_data;
+                qr_id = qrResult.qr_id;
+                qr_data = qrResult.qr_data;
             }
         }
             
