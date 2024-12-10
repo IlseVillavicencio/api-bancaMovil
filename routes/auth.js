@@ -94,84 +94,85 @@ router.post('/auth/register', async (req, res) => {
 router.post('/auth/login', async (req, res) => {
     let db;
     try {
-      
-        const {email, password} = req.body;
+        const { email, password } = req.body;
 
-        if(!email || !password){
+        if (!email || !password) {
             return res.json({
-                'status':400,
+                'status': 400,
                 'msg': 'All fields are required'
             });
-        } db = await connect();
-        
+        }
+
+        db = await connect();
+
         const query = `SELECT * FROM users WHERE email = ?`;
         const [row] = await db.execute(query, [email]);
 
-        console.log(row);
-
-
-        if(row.length === 0){
+        if (row.length === 0) {
             return res.json({
-                'status':404,
+                'status': 404,
                 'msg': 'There is no user with this email'
             });
-        } 
-        const user =row[0];
+        }
+
+        const user = row[0];
         const hashPassword = user.password;
         const passwordValid = await bcrypt.compare(password, hashPassword);
-        
 
-        if(!passwordValid) {
+        if (!passwordValid) {
             return res.json({
                 'status': 401,
                 'msg': 'Incorrect password',
                 'token': null
-        });
-        } const token = jwt.sign(
-            { email: user.email, user_id: user.user_id, name: user.first_name},
+            });
+        }
+
+        const token = jwt.sign(
+            { email: user.email, user_id: user.user_id, name: user.first_name },
             'secret',
             { expiresIn: '1h' }
+        );
 
-        ); 
-        const account_id = user.account_id;
-        console.log('Account ID:', account_id);
+        
+        const queryAccount = `SELECT account_id FROM accounts WHERE user_id = ?`;
+        const [accountResult] = await db.execute(queryAccount, [user.user_id]);
+
         let qr = { qr_id: null, qr_data: null };
 
-        if (account_id) {
-            const queryAccount = `SELECT * from qr_codes WHERE account_id = (SELECT account_id FROM accounts WHERE user_id = (SELECT user_id FROM users WHERE email = ?))`;
-            const [qrResult] = await db.execute(queryAccount, [email]);
+        if (accountResult.length > 0) {
+            const accountId = accountResult[0].account_id;
 
-            console.log('QR Result:', qrResult);
+            
+            const queryQRCode = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
+            const [qrResult] = await db.execute(queryQRCode, [accountId]);
 
             if (qrResult.length > 0) {
                 qr = qrResult[0];
-                console.log('QR Data:', qr)
             } else {
                 console.log('No QR data found for this account_id.');
-            }  
+            }
         }
-        
 
-            const deviceInfo = req.headers['user-agent'] || 'unknown';
+        const deviceInfo = req.headers['user-agent'] || 'unknown';
 
-            const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
-            await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
+        const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
+        await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
 
-            res.json({
-                'status': 200,
-                'token': token, 
-                'msg': 'Successful login',
-                'user': {
+        res.json({
+            'status': 200,
+            'token': token,
+            'msg': 'Successful login',
+            'user': {
                 'email': user.email,
                 'user_id': user.user_id,
-                'account_id': user.account_id, 
+                'account_id': accountResult.length > 0 ? accountResult[0].account_id : null,
                 'qr_id': qr.qr_id,
                 'qr_data': qr.qr_data
-    },
-            });
-        } catch(err) {
-            console.log(err);
-        }
-    });
+            },
+        });
+    } catch (err) {
+        console.log(err);
+    }
+});
 
 module.exports = router;
