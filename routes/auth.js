@@ -134,19 +134,16 @@ router.post('/auth/login', async (req, res) => {
 
         ); 
         const account_id = user.account_id;
-        let qr_id = null;
-        let qr_data = null;
-
 
         if (account_id) {
             const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
             const [qrResult] = await db.execute(queryAccount, [account_id]);
 
-            if (qrResult.length > 0) {
-                qr_id = qrResult.qr_id;
-                qr_data = qrResult.qr_data;
+            if (qrResult.length === 0) {
+                return res.json({})
             }
         }
+            const qr = qrResult[0];
             
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
@@ -161,9 +158,9 @@ router.post('/auth/login', async (req, res) => {
                 'user': {
                 'email': user.email,
                 'user_id': user.user_id,
-                'account_id': account_id, 
-                'qr_id': qr_id,
-                'qr_data': qr_data
+                'account_id': user.account_id, 
+                'qr_id': qr.qr_id,
+                'qr_data': qr.qr_data
     },
             });
         } catch(err) {
