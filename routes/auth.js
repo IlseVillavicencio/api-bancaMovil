@@ -134,7 +134,8 @@ router.post('/auth/login', async (req, res) => {
 
         ); 
         const account_id = user.account_id;
-        let qr;
+        console.log('Account ID:', account_id);
+        let qr = { qr_id: null, qr_data: null };
 
         if (account_id) {
             const queryAccount = `SELECT * from qr_codes WHERE account_id = (SELECT account_id FROM accounts WHERE user_id = (SELECT user_id FROM users WHERE email = ?))`;
@@ -164,8 +165,8 @@ router.post('/auth/login', async (req, res) => {
                 'email': user.email,
                 'user_id': user.user_id,
                 'account_id': user.account_id, 
-                'qr_id': qr ? qr.qr_id : null,
-                'qr_data': qr ? qr.qr_data : null 
+                'qr_id': qr.qr_id,
+                'qr_data': qr.qr_data
     },
             });
         } catch(err) {
