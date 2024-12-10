@@ -137,7 +137,7 @@ router.post('/auth/login', async (req, res) => {
         let qr_id = null;
         let qr_data = null;
 
-        
+
         if (account_id) {
             const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
             const [qrResult] = await db.execute(queryAccount, [account_id]);
@@ -162,8 +162,8 @@ router.post('/auth/login', async (req, res) => {
                 'email': user.email,
                 'user_id': user.user_id,
                 'account_id': account_id, 
-                'qr_id': qrResult.qr_id,
-                'qr_data': qrResult.qr_data
+                'qr_id': qr_id,
+                'qr_data': qr_data
     },
             });
         } catch(err) {
