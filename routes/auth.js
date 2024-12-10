@@ -134,7 +134,7 @@ router.post('/auth/login', async (req, res) => {
 
         ); 
         const account_id = user.account_id;
-        let qr = { qr_id: null, qr_data: null };
+        
 
         if (!account_id) {
             console.log('Account ID is null or undefined for this user.');
