@@ -137,8 +137,8 @@ router.post('/auth/login', async (req, res) => {
         let qr = null;
 
         if (account_id) {
-            const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = <account_id>`;
-            const [qrResult] = await db.execute(queryAccount, [account_id]);
+            const queryAccount = `SELECT * from qr_codes WHERE account_id = (SELECT account_id FROM accounts WHERE user_id = (SELECT user_id FROM users WHERE email = ?))`;
+            const [qrResult] = await db.execute(queryAccount, [email]);
 
             console.log('QR Result:', qrResult);
 
