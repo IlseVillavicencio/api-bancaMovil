@@ -134,7 +134,7 @@ router.post('/auth/login', async (req, res) => {
 
         ); 
         const account_id = user.account_id;
-        let qr = null;
+        let qr;
 
         if (account_id) {
             const queryAccount = `SELECT * from qr_codes WHERE account_id = (SELECT account_id FROM accounts WHERE user_id = (SELECT user_id FROM users WHERE email = ?))`;
