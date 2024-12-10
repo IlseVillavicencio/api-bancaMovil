@@ -133,19 +133,20 @@ router.post('/auth/login', async (req, res) => {
             { expiresIn: '1h' }
 
         ); 
-            const account_id = user.account_id;
-            const qr_id = user.qr_id; 
-            let qr_data = null;
+        const account_id = user.account_id;
+        let qr_id = null;
+        let qr_data = null;
 
-            
-            if (account_id) {
-                const queryAccount = `SELECT * FROM qr_codes WHERE account_id = ?`;
-                const [qrResult] = await db.execute(queryAccount, [account_id]);
-            
-                if (qrResult.length > 0) {
-                    qr_data = qrResult[0].qr_data;
-                }
+        
+        if (account_id) {
+            const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
+            const [qrResult] = await db.execute(queryAccount, [account_id]);
+
+            if (qrResult.length > 0) {
+                qr_id = qrResult[0].qr_id;
+                qr_data = qrResult[0].qr_data;
             }
+        }
             
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
@@ -161,8 +162,8 @@ router.post('/auth/login', async (req, res) => {
                 'email': user.email,
                 'user_id': user.user_id,
                 'account_id': account_id, 
-                'qr_id': qr_id,
-                'qr_data': qr_data
+                'qr_id': qrResult.qr_id,
+                'qr_data': qrResult.qr_data
     },
             });
         } catch(err) {
