@@ -140,7 +140,7 @@ router.post('/auth/login', async (req, res) => {
 
             
             if (account_id) {
-                const queryAccount = `SELECT qr_data FROM qr_codes WHERE account_id = ?`;
+                const queryAccount = `SELECT qr_data, qr_id FROM qr_codes WHERE account_id = ?`;
                 const [qrResult] = await db.execute(queryAccount, [account_id]);
             
                 if (qrResult.length > 0) {
