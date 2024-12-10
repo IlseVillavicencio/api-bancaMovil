@@ -153,7 +153,6 @@ router.post('/auth/login', async (req, res) => {
 
             const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
             await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
-            await db.execute(queryAccount, [account_id])
 
             res.json({
                 'status': 200,
