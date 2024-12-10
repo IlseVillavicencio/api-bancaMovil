@@ -135,8 +135,7 @@ router.post('/auth/login', async (req, res) => {
         ); 
             const account_id = user.account_id;
             const qr_id = user.qr_id; 
-            let qr_data = null;
-           
+            const qr_data = qr_data
 
             
             if (account_id) {
