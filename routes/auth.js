@@ -137,7 +137,7 @@ router.post('/auth/login', async (req, res) => {
         let qr = { qr_id: null, qr_data: null };
 
         if (account_id) {
-            const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
+            const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = <account_id>`;
             const [qrResult] = await db.execute(queryAccount, [account_id]);
 
             console.log('QR Result:', qrResult);
@@ -149,8 +149,7 @@ router.post('/auth/login', async (req, res) => {
                 console.log('No QR data found for this account_id.');
             }  
         }
-            
-            
+        
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
 
