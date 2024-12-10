@@ -134,16 +134,16 @@ router.post('/auth/login', async (req, res) => {
 
         ); 
         const account_id = user.account_id;
+        let qr = { qr_id: null, qr_data: null };
 
         if (account_id) {
             const queryAccount = `SELECT qr_id, qr_data FROM qr_codes WHERE account_id = ?`;
             const [qrResult] = await db.execute(queryAccount, [account_id]);
-
-            if (qrResult.length === 0) {
-                return res.json({})
-            }
+            if (qrResult.length > 0) {
+                qr = qrResult[0];
+            }   
         }
-            const qr = qrResult[0];
+            
             
 
             const deviceInfo = req.headers['user-agent'] || 'unknown';
