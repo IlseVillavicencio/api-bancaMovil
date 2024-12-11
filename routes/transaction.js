@@ -71,26 +71,5 @@ router.post('/transfer', authVerify, async (req, res) => {
     }
 });
 
-router.get("/transactions", authVerify, async (req, res) => {
-    const userId = req.user.id; 
-
-    try {
-      const [transactions] = await db.query(
-        `SELECT t.transaction_id, t.type, t.amount, t.concept, t.created_at
-         FROM transactions t
-         JOIN accounts a ON t.account_id = a.account_id
-         WHERE a.user_id = ?
-         ORDER BY t.created_at DESC`,
-        [userId]
-      );
-
-      res.json({ transactions });
-    }catch(error) {
-      console.error("Error fetching transactions:", error);
-      res.json({ 
-        'status':500,
-        'message': "Error fetching transactions" });
-    }
-  });
   
 module.exports = router;

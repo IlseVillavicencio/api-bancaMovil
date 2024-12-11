@@ -3,13 +3,18 @@ const connect = require("../db");
 const router = require("./usuarios");
 const authVerify = require("../middleware/authVerify");
 
-router.get('/transactions/history', authVerify, async (req, res) => {
+router.get('/transactions', authVerify, async (req, res) => {
+    const userId = req.user.id;
     let db;
     try {
         db = await connect();
 
         const query =
-        `SELECT * FROM transactions WHERE accound_id = ? AND transaction_type = ? ORDER BY created_at DESC`;
+        `SELECT t.transaction_id, t.type, t.amount, t.concept, t.created_at
+         FROM transactions t
+         JOIN accounts a ON t.account_id = a.account_id
+         WHERE a.user_id = ?
+         ORDER BY t.created_at DESC`;
 
         const [transactions] = await db.execute(query, [req.user.account_id]);
 
@@ -22,6 +27,7 @@ router.get('/transactions/history', authVerify, async (req, res) => {
         } res.json({
             'status':200,
             'msg': 'Transaction history',
+            'users': [userId],
             'transactions': transactions
         });
 
