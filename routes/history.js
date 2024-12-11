@@ -11,6 +11,15 @@ router.get('/transactions', authVerify, async (req, res) => {
     try {
         db = await connect();
 
+        const balanceQuery = `
+            SELECT SUM(t.amount) AS balance
+            FROM transactions t
+            JOIN accounts a ON t.account_id = a.account_id
+            WHERE a.user_id = ?`;
+        
+        const [balanceData] = await db.execute(balanceQuery, [userId]);
+        const balance = balanceData[0].balance || 0; 
+
         const query =
         `SELECT t.transaction_id, t.type, t.amount, t.concept, t.created_at
          FROM transactions t
@@ -28,6 +37,7 @@ router.get('/transactions', authVerify, async (req, res) => {
             });
         } res.json({
             'status':200,
+            'balance': balance,
             'msg': 'Transaction history',
             'transactions': transactions
         });
