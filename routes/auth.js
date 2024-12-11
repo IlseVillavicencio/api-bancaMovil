@@ -158,6 +158,11 @@ router.post('/auth/login', async (req, res) => {
         const queryInsertLog = `INSERT INTO login_logs (user_id, last_login, device_info) VALUES (?, NOW(), ?)`;
         await db.execute(queryInsertLog, [user.user_id, deviceInfo]);
 
+        const queryLastLogin = `SELECT last_login FROM login_logs WHERE user_id = ? ORDER BY last_login DESC LIMIT 1`;
+        const [lastLoginResult] = await db.execute(queryLastLogin, [user.user_id]);
+
+        const lastLogin = lastLoginResult.length > 0 ? lastLoginResult[0].last_login : null;
+
         res.json({
             'status': 200,
             'token': token,
@@ -167,7 +172,8 @@ router.post('/auth/login', async (req, res) => {
                 'user_id': user.user_id,
                 'account_id': accountResult.length > 0 ? accountResult[0].account_id : null,
                 'qr_id': qr.qr_id,
-                'qr_data': qr.qr_data
+                'qr_data': qr.qr_data,
+                'last_login': lastLogin
             },
         });
     } catch (err) {
