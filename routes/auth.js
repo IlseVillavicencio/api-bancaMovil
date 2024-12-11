@@ -126,19 +126,6 @@ router.post('/auth/login', async (req, res) => {
                 'token': null
             });
         }
-
-        const loginQuery = `
-            SELECT l.last_login
-            FROM login_logs l
-            WHERE l.user_id = ?
-            ORDER BY l.last_login DESC
-            LIMIT 1
-        `;
-        
-        const [loginResults] = await db.execute(loginQuery, [user.id]);
-
-        const lastLogin = loginResults.length > 0 ? loginResults[0].last_login : 'Never';
-
         
 
         const token = jwt.sign(
