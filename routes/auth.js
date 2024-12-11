@@ -105,7 +105,7 @@ router.post('/auth/login', async (req, res) => {
 
         db = await connect();
 
-        const query = `SELECT id, first_name, last_name, email, password FROM users WHERE email = ?`;
+        const query = `SELECT * FROM users WHERE email = ?`;
         const [row] = await db.execute(query, [email]);
 
         if (row.length === 0) {
