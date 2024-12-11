@@ -1,6 +1,7 @@
 const connect = require("../db");
-const authVerify = require("../middleware/authVerify");
-const router = express.Router();
+const express = require('express');
+const authVerify = require('../middleware/authVerify');
+const router = express.Router(); 
 
 router.get('/transactions', authVerify, async (req, res) => {
     const userId = req.user.id;
