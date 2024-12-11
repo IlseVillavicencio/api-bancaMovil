@@ -4,14 +4,9 @@ const authVerify = require('../middleware/authVerify');
 const router = express.Router(); 
 
 router.get('/transactions', authVerify, async (req, res) => {
-    
+    const userId = req.user_id;
     let db;
 
-    if (!req.user || !req.user.id) {
-        return res.status(400).json({ 'Error': 'User ID is missing from the request' });
-    }
-
-    const userId = req.user.id;
 
     try {
         db = await connect();
