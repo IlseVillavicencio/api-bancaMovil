@@ -173,7 +173,8 @@ router.post('/auth/login', async (req, res) => {
                 'account_id': accountResult.length > 0 ? accountResult[0].account_id : null,
                 'qr_id': qr.qr_id,
                 'qr_data': qr.qr_data,
-                'last_login': lastLogin
+                'last_login': lastLogin,
+                'name': user.first_name,
             },
         });
     } catch (err) {
