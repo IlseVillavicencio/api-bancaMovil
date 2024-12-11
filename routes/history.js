@@ -1,5 +1,4 @@
 const connect = require("../db");
-const router = require("./usuarios");
 const authVerify = require("../middleware/authVerify");
 const router = express.Router();
 
