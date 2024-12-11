@@ -71,7 +71,7 @@ router.post('/transfer', authVerify, async (req, res) => {
     }
 });
 
-app.get("/transactions", authenticateToken, async (req, res) => {
+router.get("/transactions", authenticateToken, async (req, res) => {
     const userId = req.user.id; 
 
     try {
