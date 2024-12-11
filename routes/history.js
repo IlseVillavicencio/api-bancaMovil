@@ -17,7 +17,7 @@ router.get('/transactions', authVerify, async (req, res) => {
         const balance = balanceData[0].balance || 0; 
 
         const query =
-        `SELECT t.transaction_id, t.type, t.amount, t.concept, t.created_at
+        `SELECT t.transaction_id, t.type, t.amount, t.concept, DATE(t.created_at) as created_at
          FROM transactions t
          JOIN accounts a ON t.account_id = a.account_id
          WHERE a.user_id = ?
