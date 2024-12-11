@@ -11,11 +11,7 @@ router.get('/transactions', authVerify, async (req, res) => {
     try {
         db = await connect();
 
-        const balanceQuery = `
-            SELECT SUM(t.amount) AS balance
-            FROM transactions t
-            JOIN accounts a ON t.account_id = a.account_id
-            WHERE a.user_id = ?`;
+        const balanceQuery = `SELECT balance FROM accounts WHERE account_id = ?;`;
         
         const [balanceData] = await db.execute(balanceQuery, [userId]);
         const balance = balanceData[0].balance || 0; 
