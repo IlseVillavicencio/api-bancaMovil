@@ -126,7 +126,6 @@ router.post('/auth/login', async (req, res) => {
                 'token': null
             });
         }
-        
 
         const token = jwt.sign(
             { email: user.email, user_id: user.user_id, name: user.first_name },
@@ -167,7 +166,6 @@ router.post('/auth/login', async (req, res) => {
                 'email': user.email,
                 'user_id': user.user_id,
                 'account_id': accountResult.length > 0 ? accountResult[0].account_id : null,
-                'last_login': lastLogin,
                 'qr_id': qr.qr_id,
                 'qr_data': qr.qr_data
             },
