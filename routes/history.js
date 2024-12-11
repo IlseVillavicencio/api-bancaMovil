@@ -1,7 +1,7 @@
-const { SELECT } = require("sequelize/lib/query-types");
 const connect = require("../db");
 const router = require("./usuarios");
 const authVerify = require("../middleware/authVerify");
+const router = express.Router();
 
 router.get('/transactions', authVerify, async (req, res) => {
     const userId = req.user.id;
@@ -16,7 +16,7 @@ router.get('/transactions', authVerify, async (req, res) => {
          WHERE a.user_id = ?
          ORDER BY t.created_at DESC`;
 
-        const [transactions] = await db.execute(query, [req.user.account_id]);
+         const [transactions] = await db.execute(query, [userId]);
 
         if(transactions.length === 0) {
             return res.json({
@@ -27,7 +27,6 @@ router.get('/transactions', authVerify, async (req, res) => {
         } res.json({
             'status':200,
             'msg': 'Transaction history',
-            'users': [userId],
             'transactions': transactions
         });
 
